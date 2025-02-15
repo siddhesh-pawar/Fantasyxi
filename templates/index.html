@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fantasy 11 Predictor</title>
+    <link rel="stylesheet" href="./static/styles.css">
+</head>
+<body>
+    <h2>Fantasy 11 Predictor</h2>
+    
+    <form id="fantasyForm">
+        <label>Team 1 Name:</label>
+        <input type="text" name="team1" required><br>
+        
+        <label>Team 2 Name:</label>
+        <input type="text" name="team2" required><br>
+       
+        <div class="slider-container">
+            <label>Risk Profile:</label>
+            <input type="range" id="riskSlider" name="risk_profile" class="slider" min="1" max="5" value="3" step="1">
+            <div class="risk-labels">
+                <span>Low Risk</span>
+                <span>Medium</span>
+                <span>High Risk</span>
+            </div>
+            <div id="riskValue" class="risk-value">Medium Risk</div>
+        </div>
+
+        <div>
+            <h3>Selection Preferences</h3>
+            <div>
+                <input type="checkbox" id="recent-form" name="selection_preference" value="recent_form" checked>
+                <label for="recent-form">Prefer Recent Form</label>
+            </div>
+            <div>
+                <input type="checkbox" id="consistent" name="selection_preference" value="consistent_players">
+                <label for="consistent">Prefer Consistent Players</label>
+            </div>
+            <div>
+                <input type="checkbox" id="venue" name="selection_preference" value="venue_performers">
+                <label for="venue">Prefer Venue Performers</label>
+            </div>
+            <div>
+                <input type="checkbox" id="weather" name="selection_preference" value="weather_performance">
+                <label for="weather">Select players according to the weather conditions</label>
+            </div>
+        </div>
+
+        <div>
+            <h3>Match situation Preferences</h3>
+            <div>
+                <input type="checkbox" id="powerplay" name="situation_preference" value="powerplay" checked>
+                <label for="powerplay">Powerplay specialists</label>
+            </div>
+            <div>
+                <input type="checkbox" id="death" name="situation_preference" value="death">
+                <label for="death">Death over specialists</label>
+            </div>
+            <div>
+                <input type="checkbox" id="chasing" name="situation_preference" value="chasing">
+                <label for="chasing">Chasing specialists</label>
+            </div>
+            <div>
+                <input type="checkbox" id="defending" name="situation_preference" value="defending">
+                <label for="defending">Defending specialists</label>
+            </div>
+        </div>
+
+        <button type="submit">Predict</button>
+    </form>
+
+    <button type="button" id="showPopularPicks">Show Most Popular Picks</button>
+    <div id="popularPicks" style="display: none;">
+        <h3>Top 5 Most Selected Players</h3>
+        <ul id="popularPicksList"></ul>
+    </div>
+    
+    <div id="error" class="error"></div>
+    
+    <div class="result-section">
+        <h3>Fantasy 11:</h3>
+        <p id="result"></p>
+    </div>
+
+    <div class="result-section">
+        <h3>Analysis:</h3>
+        <p id="justification"></p>
+    </div>
+
+    <script src="./static/script.js"></script>
+</body>
+</html>

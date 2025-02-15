@@ -1,0 +1,114 @@
+h2 {
+    text-align: center;
+}
+
+body {
+    background-color: rgb(235, 228, 228);
+}
+
+.error {
+    color: red;
+    margin: 10px 0;
+}
+
+.result-section {
+    margin: 20px 0;
+    padding: 10px;
+    background-color: #f5f5f5;
+    border-radius: 5px;
+}
+
+.slider-container {
+    margin: 20px 0;
+}
+
+.risk-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 5px;
+}
+
+.risk-value {
+    text-align: center;
+    margin-top: 5px;
+    font-weight: bold;
+}
+
+form {
+    max-width: 600px;
+    margin: 20px auto;
+}
+
+label {
+    display: inline-block;
+    margin: 5px 0;
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 8px;
+    margin: 5px 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.slider {
+    width: 100%;
+    margin: 10px 0;
+}
+
+button {
+    background-color: #e53535;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 10px 0;
+}
+
+button:hover {
+    background-color: #e53535;
+}
+
+/* #popularPicks {
+    margin: 20px 0;
+    padding: 15px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+#popularPicksList {
+    list-style-type: none;
+    padding: 0;
+}
+
+#popularPicksList li {
+    padding: 5px 0;
+    border-bottom: 1px solid #eee;
+} */
+
+
+/* Center all the elements in their container */
+#showPopularPicks,
+#popularPicks,
+#error,
+.result-section {
+    margin: 0 auto;
+    text-align: center;
+    max-width: 600px; /* Adjust this value based on your needs */
+}
+
+/* Specifically for the button */
+#showPopularPicks {
+    display: block; /* Makes the button respect margin: auto */
+    margin: 20px auto;
+}
+
+/* For the lists inside popularPicks */
+#popularPicksList {
+    list-style-position: inside; /* Centers the bullet points */
+    padding: 0;
+}
+
