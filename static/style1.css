@@ -5,6 +5,22 @@
     box-sizing: border-box;
 }
 
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.logo-img {
+    height: 60px;
+    width: auto;
+    object-fit: contain;
+}
+
+.logo span {
+    font-size: 1.2rem;
+}
+
 body {
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     line-height: 1.6;
@@ -15,7 +31,7 @@ body {
     position: relative;
 }
 
-h2 {
+/* h2 {
     color: #f32525;
     text-align: center;
     margin-bottom: 1.5rem;
@@ -23,6 +39,51 @@ h2 {
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 1px;
+} */
+
+
+h2 {
+    color: white;  /* Base color */
+    text-align: center;
+    margin-bottom: 1.5rem;
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    font-weight: 700;  /* Made slightly bolder */
+    text-transform: uppercase;
+    letter-spacing: 2px;  /* Increased spacing */
+    
+    /* Text shadow for depth */
+    text-shadow: 
+        2px 2px 4px rgba(0, 0, 0, 0.5),
+        0 0 20px rgba(255, 255, 255, 0.2);
+    
+    /* Optional: Gradient text */
+    background: linear-gradient(45deg, #fff, #f32525);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    
+    /* Animation on load */
+    animation: fadeInScale 1s ease-out;
+}
+
+/* Optional: Animation keyframes */
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Add a subtle glow effect on hover */
+h2:hover {
+    text-shadow: 
+        2px 2px 4px rgba(0, 0, 0, 0.5),
+        0 0 30px rgba(243, 37, 37, 0.4);
+    transition: text-shadow 0.3s ease;
 }
 
 h3 {
@@ -824,5 +885,115 @@ footer {
     
     .footer-content {
         gap: var(--spacing-lg);
+    }
+}
+
+
+/* Different result section */
+.results-container {
+    margin-top: 1rem;
+    width: min(100%, 900px);
+    margin-left: auto;
+    margin-right: auto;
+    padding: 2rem;
+}
+
+.results-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.results-title {
+    color: white;
+    font-size: clamp(1.8rem, 3vw, 2.5rem);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.results-subtitle {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.1rem;
+    font-weight: 400;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.results-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.results-card:hover {
+    transform: translateY(-5px);
+}
+
+.card-header {
+    background: linear-gradient(45deg, #b54141, #e44644);
+    color: white;
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.pulse-icon {
+    width: 12px;
+    height: 12px;
+    background-color: #2ea2cc;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+.player-list {
+    padding: 2rem;
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+/* Add these styles while keeping all your previous CSS */
+.player-list {
+    padding: 2rem;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    list-style-position: inside;
+    list-style-type: decimal;
+}
+
+.player-list li {
+    font-weight: 700;
+    margin-bottom: 0.8rem;
+    padding-left: 1rem;
+}
+
+
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(46, 204, 113, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(46, 204, 113, 0);
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .results-container {
+        padding: 1rem;
+    }
+    
+    .player-list {
+        padding: 1.5rem;
     }
 }

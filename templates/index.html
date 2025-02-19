@@ -18,7 +18,11 @@
     
         <nav class="navbar">
             <div class="nav-container">
-                <div class="logo">Fantasy 11</div>
+                <!-- <div class="logo">Fantasy11</div> -->
+                <div class="logo">
+                    <img src="/static/images/ipl.png" alt="Fantasy11 Logo" class="logo-img">
+                    <span>Fantasy11</span>
+                </div>
                 <div class="nav-links">
                     <a href="#features">Features</a>
                     <a href="#how-it-works">How It Works</a>
@@ -30,7 +34,7 @@
     
         <section class="hero">
             <div class="hero-content">
-                <h1>Fantasy 11 Predictor</h1>
+                <h1>Fantasy11 Predictor</h1>
                 <p>Harness the power of AI to build your winning IPL fantasy team. Make data-driven decisions and stay ahead of the competition with our advanced prediction engine.</p>
                 <div class="hero-buttons">
                     <a href="#fantasyForm" class="cta-button primary">Start Building Your Team</a>
@@ -188,24 +192,51 @@
         
     </form>
 
+    <!-- <div class="buttoncontainer">
+        <button type="button" id="showPopularPicks">Show Most Popular Picks</button>
+    </div>
+    <div id="popularPicks" class="result-section" style="display: none;">
+        <h3>Top 5 Most Selected Players</h3>
+        <ol id="popularPicksList"></ol>
+    </div> -->
+    
+    <div id="error" class="error"></div>
+    
+    <!-- <div class="result-section">
+        <h3>Fantasy 11:</h3>
+        <p id="result"></p>
+    </div> -->
+
+    <!-- Different result section -->
+    <div class="results-container">
+        <div class="results-header">
+            <h2 class="results-title">Your AI-Powered Dream 11</h2>
+            <p class="results-subtitle">Optimized based on your preferences and our advanced AI engine</p>
+        </div>
+        
+        <div class="results-card">
+            <div class="card-header">
+                <div class="pulse-icon"></div>
+                <span>Recommended Playing XI</span>
+            </div>
+            <div class="player-list" id="result">
+                <!-- Players will be inserted here by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- <div class="result-section">
+        <h3>Analysis:</h3>
+        <p id="justification"></p>
+    </div> -->
+
+
     <div class="buttoncontainer">
         <button type="button" id="showPopularPicks">Show Most Popular Picks</button>
     </div>
     <div id="popularPicks" class="result-section" style="display: none;">
         <h3>Top 5 Most Selected Players</h3>
         <ol id="popularPicksList"></ol>
-    </div>
-    
-    <div id="error" class="error"></div>
-    
-    <div class="result-section">
-        <h3>Fantasy 11:</h3>
-        <p id="result"></p>
-    </div>
-
-    <div class="result-section">
-        <h3>Analysis:</h3>
-        <p id="justification"></p>
     </div>
 
     <footer id="contact">

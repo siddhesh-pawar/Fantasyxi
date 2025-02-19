@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             document.getElementById('error').textContent = '';
             document.getElementById('result').textContent = '';
-            document.getElementById('justification').textContent = '';
+            //document.getElementById('justification').textContent = '';
             
             let formData = new FormData(event.target);
             
@@ -107,8 +107,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (data.error) {
                     document.getElementById('error').textContent = data.error;
                 } else {
-                    document.getElementById('result').textContent = data['Fantasy 11'].join(', ');
-                    document.getElementById('justification').textContent = data['Justification'];
+
+                    const resultDiv = document.getElementById('result');
+                    resultDiv.innerHTML = ''; // Clear previous results
+    
+                    // Create ordered list with the players
+                    const playersList = data['Fantasy 11'];
+                    playersList.forEach(player => {
+                        const li = document.createElement('li');
+                        li.textContent = player;
+                        resultDiv.appendChild(li);
+                    });
+                    //document.getElementById('result').textContent = data['Fantasy 11'].join(', ');
+                    //document.getElementById('justification').textContent = data['Justification'];
                 }
             } catch (error) {
                 document.getElementById('error').textContent = 'An error occurred. Please try again.';
