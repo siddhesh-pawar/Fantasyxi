@@ -72,17 +72,41 @@ def home():
     session.clear()
     return render_template('index.html')
 
+# @app.route('/get_popular_picks', methods=['GET'])
+# def get_popular_picks():
+#     # Get team names from query parameters instead of session
+#     team1 = request.args.get('team1')
+#     team2 = request.args.get('team2')
+    
+#     if not team1 or not team2:
+#         return jsonify({"error": "Please select both teams first"})
+    
+#     players_list = get_players_from_url(team1, team2)
+#     return jsonify({"popular_picks": players_list[:5]})
+
 @app.route('/get_popular_picks', methods=['GET'])
 def get_popular_picks():
-    # Get team names from query parameters instead of session
     team1 = request.args.get('team1')
     team2 = request.args.get('team2')
-    
+
     if not team1 or not team2:
         return jsonify({"error": "Please select both teams first"})
-    
+
     players_list = get_players_from_url(team1, team2)
-    return jsonify({"popular_picks": players_list[:5]})
+
+    # Generate a seed based on the teams
+    seed = int(hashlib.md5(f"{team1}-{team2}".encode()).hexdigest(), 16)
+    
+    # Use the seed for a deterministic shuffle
+    random.seed(seed)
+    shuffled_players = players_list.copy()
+    random.shuffle(shuffled_players)
+
+    # Reset the random seed to avoid affecting other random operations
+    random.seed()
+
+    return jsonify({"popular_picks": shuffled_players[:5]})
+
     
 
 @app.route('/predict', methods=['POST'])
