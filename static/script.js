@@ -50,9 +50,11 @@ document.addEventListener('DOMContentLoaded', function() {
         // Event listener for the button click
         showPopularPicksBtn.addEventListener('click', async function () {
             console.log('Button clicked!');
+            const team1Select = document.getElementById('team1');
+            const team2Select = document.getElementById('team2');
             try {
                 console.log('Fetching popular picks...');
-                const response = await fetch('/get_popular_picks');
+                const response = await fetch(`/get_popular_picks?team1=${encodeURIComponent(team1Select.value)}&team2=${encodeURIComponent(team2Select.value)}`);
                 const data = await response.json();
                 console.log('Received data:', data);
                 
