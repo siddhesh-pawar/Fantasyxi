@@ -6,7 +6,6 @@ from matches import get_players_from_url
 import hashlib
 
 load_dotenv()
-llm = ChatOpenAI(model_name="gpt-4-turbo")
 
 app = Flask(__name__)
 app.secret_key = "your_secret_key_here"
