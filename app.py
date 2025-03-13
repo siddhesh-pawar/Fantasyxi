@@ -22,20 +22,6 @@ def get_team_key(team1, team2):
     teams = sorted([team1, team2])  # Sort to ensure same key regardless of order
     return f"{teams[0]}-{teams[1]}"
 
-def check_prediction_limit(team1, team2):
-    """Check if prediction limit is reached for team combination"""
-    team_key = get_team_key(team1, team2)
-    predictions = session.get('predictions', {})
-    count = predictions.get(team_key, 0)
-    return count >= 3
-
-def increment_prediction_count(team1, team2):
-    """Increment prediction count for team combination"""
-    team_key = get_team_key(team1, team2)
-    predictions = session.get('predictions', {})
-    predictions[team_key] = predictions.get(team_key, 0) + 1
-    session['predictions'] = predictions
-
 def generate_fantasy_11(team1, team2, form_data):
     """Generate fantasy 11 with exactly 6 constant and 5 variable players"""
     # Get all players
@@ -119,25 +105,15 @@ def predict():
 
         if team1 == team2:
             return jsonify({'error': 'Please select different teams'})
-            
-        # Check prediction limit
-        if check_prediction_limit(team1, team2):
-            return jsonify({'error': 'Prediction limit reached for these teams'})
         
         form_data = request.form.to_dict()
         fantasy_11 = generate_fantasy_11(team1, team2, form_data)
         
-        # Increment prediction count
-        increment_prediction_count(team1, team2)
-        
         # Get remaining predictions
         team_key = get_team_key(team1, team2)
-        predictions = session.get('predictions', {})
-        remaining = 3 - predictions.get(team_key, 0)
         
         return jsonify({
-            'Fantasy 11': fantasy_11,
-            'predictions_remaining': remaining
+            'Fantasy 11': fantasy_11
         })
     except Exception as e:
         print(f"Error in predict route: {str(e)}")

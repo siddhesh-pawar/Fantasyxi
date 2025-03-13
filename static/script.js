@@ -92,41 +92,46 @@ document.addEventListener('DOMContentLoaded', function() {
         fantasyForm.addEventListener('submit', async function(event) {
             event.preventDefault();
             
-            document.getElementById('error').textContent = '';
-            document.getElementById('result').textContent = '';
-            //document.getElementById('justification').textContent = '';
+            // Show spinner and disable button
+            spinner.style.display = "inline-block";
+            predictButton.disabled = true;
             
-            let formData = new FormData(event.target);
-            
-            try {
-                let response = await fetch('/predict', {
-                    method: 'POST',
-                    body: formData
-                });
+            setTimeout(async function() {
+                // Hide spinner and enable button after 3 seconds
+                spinner.style.display = "none";
+                predictButton.disabled = false;
                 
-                let data = await response.json();
-                
-                if (data.error) {
-                    document.getElementById('error').textContent = data.error;
-                } else {
+                // Proceed with form submission
+                document.getElementById('error').textContent = '';
+                document.getElementById('result').textContent = '';
 
-                    const resultDiv = document.getElementById('result');
-                    resultDiv.innerHTML = ''; // Clear previous results
-    
-                    // Create ordered list with the players
-                    const playersList = data['Fantasy 11'];
-                    playersList.forEach(player => {
-                        const li = document.createElement('li');
-                        li.textContent = player;
-                        resultDiv.appendChild(li);
+                let formData = new FormData(event.target);
+                
+                try {
+                    let response = await fetch('/predict', {
+                        method: 'POST',
+                        body: formData
                     });
-                    //document.getElementById('result').textContent = data['Fantasy 11'].join(', ');
-                    //document.getElementById('justification').textContent = data['Justification'];
+
+                    let data = await response.json();
+
+                    if (data.error) {
+                        document.getElementById('error').textContent = data.error;
+                    } else {
+                        const resultDiv = document.getElementById('result');
+                        resultDiv.innerHTML = '';
+
+                        data['Fantasy 11'].forEach(player => {
+                            const li = document.createElement('li');
+                            li.textContent = player;
+                            resultDiv.appendChild(li);
+                        });
+                    }
+                } catch (error) {
+                    document.getElementById('error').textContent = 'An error occurred. Please try again.';
+                    console.error('Error:', error);
                 }
-            } catch (error) {
-                document.getElementById('error').textContent = 'An error occurred. Please try again.';
-                console.error('Error:', error);
-            }
+            }, 3000);
         });
     }
 });
