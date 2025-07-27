@@ -155,7 +155,7 @@ def get_players_from_url(team1, team2):
     try:
         match_no = None
         for key, value in match_teams.items():
-            if value == (team1, team2):  # Match teams in exact order
+            if value == (team1, team2) or value == (team2, team1):  # Match teams in exact order
                 match_no = key
                 break
         
