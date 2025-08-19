@@ -64,21 +64,6 @@ def home():
     session.clear()
     return render_template('index.html')
 
-@app.route('/get_prediction_count', methods=['POST'])
-def get_prediction_count():
-    """Get remaining predictions for team combination"""
-    team1 = request.form.get('team1')
-    team2 = request.form.get('team2')
-    
-    if team1 and team2:
-        team_key = get_team_key(team1, team2)
-        predictions = session.get('predictions', {})
-        count = predictions.get(team_key, 0)
-        return jsonify({
-            'remaining': 3 - count,
-            'total_used': count
-        })
-    return jsonify({'error': 'Invalid teams'})
 
 @app.route('/get_popular_picks', methods=['GET'])
 def get_popular_picks():
