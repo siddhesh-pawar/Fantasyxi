@@ -3,16 +3,16 @@
 // ========================================
 
 const teams = [
-    { id: 'csk', name: 'Chennai Super Kings', logo: './static/images/teams/csk.png', shortName: 'CSK' },
-    { id: 'dc', name: 'Delhi Capitals', logo: './static/images/teams/dc.png', shortName: 'DC' },
-    { id: 'gt', name: 'Gujarat Titans', logo: './static/images/teams/gt.png', shortName: 'GT' },
-    { id: 'kkr', name: 'Kolkata Knight Riders', logo: './static/images/teams/kkr.png', shortName: 'KKR' },
-    { id: 'lsg', name: 'Lucknow Super Giants', logo: './static/images/teams/lsg.png', shortName: 'LSG' },
-    { id: 'mi', name: 'Mumbai Indians', logo: './static/images/teams/mi.png', shortName: 'MI' },
-    { id: 'pk', name: 'Punjab Kings', logo: './static/images/teams/pk.png', shortName: 'PBKS' },
-    { id: 'rr', name: 'Rajasthan Royals', logo: './static/images/teams/rr.png', shortName: 'RR' },
-    { id: 'rcb', name: 'Royal Challengers Bengaluru', logo: './static/images/teams/rcb.png', shortName: 'RCB' },
-    { id: 'srh', name: 'Sunrisers Hyderabad', logo: './static/images/teams/srh.png', shortName: 'SRH' }
+    { id: 'csk', name: 'Chennai Super Kings', logo: '/static/images/teams/csk.png', shortName: 'CSK' },
+    { id: 'dc', name: 'Delhi Capitals', logo: '/static/images/teams/dc.png', shortName: 'DC' },
+    { id: 'gt', name: 'Gujarat Titans', logo: '/static/images/teams/gt.png', shortName: 'GT' },
+    { id: 'kkr', name: 'Kolkata Knight Riders', logo: '/static/images/teams/kkr.png', shortName: 'KKR' },
+    { id: 'lsg', name: 'Lucknow Super Giants', logo: '/static/images/teams/lsg.png', shortName: 'LSG' },
+    { id: 'mi', name: 'Mumbai Indians', logo: '/static/images/teams/mi.png', shortName: 'MI' },
+    { id: 'pk', name: 'Punjab Kings', logo: '/static/images/teams/pk.png', shortName: 'PBKS' },
+    { id: 'rr', name: 'Rajasthan Royals', logo: '/static/images/teams/rr.png', shortName: 'RR' },
+    { id: 'rcb', name: 'Royal Challengers Bengaluru', logo: '/static/images/teams/rcb.png', shortName: 'RCB' },
+    { id: 'srh', name: 'Sunrisers Hyderabad', logo: '/static/images/teams/srh.png', shortName: 'SRH' }
 ];
 
 let selectedTeam1 = null;
