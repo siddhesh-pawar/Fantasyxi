@@ -26,19 +26,25 @@
     </div>
 
     <nav class="navbar">
-        <div class="nav-container">
-            <div class="logo">
-                <img src="/static/images/ipl3.png" alt="Fantasy11 Logo" class="logo-img">
-                <span>Fantasy11</span>
-            </div>
-            <div class="nav-links">
-                <a href="#features">Features</a>
-                <a href="#how-it-works">How It Works</a>
-                <a href="#contact">Contact</a>
-                <a href="#team-selector">Get Started</a>
-            </div>
+    <div class="nav-container">
+        <div class="logo">
+            <img src="/static/images/ipl3.png" alt="Fantasy11 Logo" class="logo-img">
+            <span>Fantasy11</span>
         </div>
+        <div class="nav-links">
+            <a href="#features">Features</a>
+            <a href="#how-it-works">How It Works</a>
+            <a href="{{ url_for('profile') }}">Profile</a>
+            <a href="{{ url_for('logout') }}" class="nav-cta">Logout</a>
+        </div>
+    </div>
     </nav>
+
+    {% if current_user.is_authenticated %}
+    <p style="text-align: center; color: #f32525; margin-top: 120px;">
+        Welcome, {{ current_user.username }}!
+    </p>
+{% endif %}
 
     <section class="hero">
         <div class="hero-content">
