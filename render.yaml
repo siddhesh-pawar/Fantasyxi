@@ -1,0 +1,29 @@
+databases:
+  - name: fantasy11-db
+    databaseName: fantasy11
+    user: fantasy11_user
+    plan: free
+
+services:
+  - type: web
+    name: fantasy11-app
+    runtime: python
+    repo: https://github.com/siddhesh-pawar/Fantasyxi  # Update this 
+    branch: main
+    buildCommand: |
+      pip install -r requirements.txt
+      python -m flask db upgrade
+    startCommand: gunicorn app:app
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: fantasy11-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: FLASK_ENV
+        value: production
+      - key: PYTHON_VERSION
+        value: 3.11.6
+    healthCheckPath: /health
+    plan: free

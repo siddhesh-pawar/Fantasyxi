@@ -1,25 +1,62 @@
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for, flash
+import os
+import logging
+from flask import Flask, render_template, request, jsonify, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+from flask_migrate import Migrate
+from flask_wtf.csrf import CSRFProtect
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
 import random
 from dotenv import load_dotenv
-import os
-from matches import get_players_from_url
 import hashlib
 import re
 
+# Load environment variables
 load_dotenv()
 
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO if os.environ.get('FLASK_ENV') == 'production' else logging.DEBUG,
+    format='%(asctime)s %(levelname)s: %(message)s'
+)
+logger = logging.getLogger(__name__)
+
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your-secret-key-change-this-in-production')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///fantasy11.db'
+
+
+
+# Configuration
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
+if not app.config['SECRET_KEY']:
+    raise ValueError("No SECRET_KEY set for Flask application")
+
+# Database configuration
+DATABASE_URL = os.environ.get('DATABASE_URL', 'sqlite:///fantasy11.db')
+# Handle Render's postgres:// URL (needs to be postgresql://)
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    'pool_size': 10,
+    'pool_recycle': 3600,
+    'pool_pre_ping': True
+}
+
+# Security configurations
+app.config['SESSION_COOKIE_SECURE'] = os.environ.get('FLASK_ENV') == 'production'
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
+app.config['WTF_CSRF_ENABLED'] = True
+app.config['WTF_CSRF_TIME_LIMIT'] = None
 
 # Initialize extensions
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
+csrf = CSRFProtect(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
@@ -29,13 +66,11 @@ login_manager.login_message_category = 'info'
 # User Model
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
+    username = db.Column(db.String(80), unique=True, nullable=False, index=True)
+    email = db.Column(db.String(120), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.String(200), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     is_active = db.Column(db.Boolean, default=True)
-    
-    # User preferences (can be expanded)
     favorite_team = db.Column(db.String(100))
     predictions_count = db.Column(db.Integer, default=0)
     
@@ -48,24 +83,20 @@ class User(UserMixin, db.Model):
     def __repr__(self):
         return f'<User {self.username}>'
 
-# Prediction History Model (optional - to track user predictions)
+# Prediction History Model
 class PredictionHistory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, index=True)
     team1 = db.Column(db.String(100), nullable=False)
     team2 = db.Column(db.String(100), nullable=False)
-    predicted_team = db.Column(db.Text, nullable=False)  # JSON string of the team
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    predicted_team = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
     
     user = db.relationship('User', backref=db.backref('predictions', lazy=True))
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
-
-# Create tables
-with app.app_context():
-    db.create_all()
 
 # Utility functions
 def validate_email(email):
@@ -88,40 +119,91 @@ def get_seed_from_inputs(team1, team2, form_data):
     """Generate a consistent seed from the input parameters"""
     input_string = f"{team1}-{team2}"
     for key in sorted(form_data.keys()):
-        input_string += f"-{key}:{form_data[key]}"
+        if key not in ['csrf_token', 'team1', 'team2']:  # Exclude CSRF token and team names
+            input_string += f"-{key}:{form_data[key]}"
     return int(hashlib.md5(input_string.encode()).hexdigest(), 16)
 
-def get_team_key(team1, team2):
-    """Generate a consistent key for team combination"""
-    teams = sorted([team1, team2])
-    return f"{teams[0]}-{teams[1]}"
+def get_players_pool(team1, team2):
+    """Get players for the given teams - Replace with your actual implementation"""
+    # This is a placeholder - implement your actual player fetching logic here
+    # You might want to use an API or database to get real player data
+    
+    team_players = {
+        "Chennai Super Kings": ["MS Dhoni", "Ruturaj Gaikwad", "Devon Conway", "Ravindra Jadeja", 
+                               "Moeen Ali", "Deepak Chahar", "Tushar Deshpande", "Matheesha Pathirana"],
+        "Mumbai Indians": ["Rohit Sharma", "Ishan Kishan", "Suryakumar Yadav", "Tilak Varma", 
+                          "Hardik Pandya", "Tim David", "Jasprit Bumrah", "Piyush Chawla"],
+        "Royal Challengers Bengaluru": ["Virat Kohli", "Faf du Plessis", "Glenn Maxwell", "Cameron Green",
+                                        "Dinesh Karthik", "Mohammed Siraj", "Josh Hazlewood", "Wanindu Hasaranga"],
+        "Kolkata Knight Riders": ["Shreyas Iyer", "Nitish Rana", "Rinku Singh", "Andre Russell",
+                                  "Sunil Narine", "Venkatesh Iyer", "Varun Chakravarthy", "Mitchell Starc"],
+        "Delhi Capitals": ["David Warner", "Prithvi Shaw", "Mitchell Marsh", "Rishabh Pant",
+                          "Axar Patel", "Kuldeep Yadav", "Anrich Nortje", "Ishant Sharma"],
+        "Rajasthan Royals": ["Yashasvi Jaiswal", "Jos Buttler", "Sanju Samson", "Shimron Hetmyer",
+                            "Ravichandran Ashwin", "Yuzvendra Chahal", "Trent Boult", "Prasidh Krishna"],
+        "Punjab Kings": ["Shikhar Dhawan", "Jonny Bairstow", "Liam Livingstone", "Jitesh Sharma",
+                        "Sam Curran", "Arshdeep Singh", "Kagiso Rabada", "Rahul Chahar"],
+        "Sunrisers Hyderabad": ["Abhishek Sharma", "Travis Head", "Aiden Markram", "Heinrich Klaasen",
+                               "Abdul Samad", "Pat Cummins", "Bhuvneshwar Kumar", "T Natarajan"],
+        "Gujarat Titans": ["Shubman Gill", "Wriddhiman Saha", "Hardik Pandya", "David Miller",
+                          "Rahul Tewatia", "Rashid Khan", "Mohammed Shami", "Josh Little"],
+        "Lucknow Super Giants": ["KL Rahul", "Quinton de Kock", "Marcus Stoinis", "Nicholas Pooran",
+                                 "Krunal Pandya", "Ravi Bishnoi", "Mark Wood", "Avesh Khan"]
+    }
+    
+    players1 = team_players.get(team1, [f"{team1} Player {i}" for i in range(1, 9)])
+    players2 = team_players.get(team2, [f"{team2} Player {i}" for i in range(1, 9)])
+    
+    return players1 + players2
 
 def generate_fantasy_11(team1, team2, form_data):
     """Generate fantasy 11 with exactly 6 constant and 5 variable players"""
-    all_players = get_players_from_url(team1, team2)
-    
-    core_seed = int(hashlib.md5(f"{team1}-{team2}".encode()).hexdigest(), 16)
-    core_rng = random.Random(core_seed)
-    
-    all_players_copy = all_players.copy()
-    core_rng.shuffle(all_players_copy)
-    core_players = all_players_copy[:6]
-    
-    remaining_pool = [p for p in all_players if p not in core_players]
-    
-    variable_seed = get_seed_from_inputs(team1, team2, form_data)
-    variable_rng = random.Random(variable_seed)
-    
-    variable_rng.shuffle(remaining_pool)
-    variable_players = remaining_pool[:5]
-    
-    final_11 = core_players + variable_players
-    
-    final_seed = variable_seed ^ core_seed
-    final_rng = random.Random(final_seed)
-    final_rng.shuffle(final_11)
-    
-    return final_11
+    try:
+        all_players = get_players_pool(team1, team2)
+        
+        if len(all_players) < 11:
+            logger.warning(f"Not enough players for {team1} vs {team2}")
+            return all_players  # Return what we have
+        
+        # Core players (constant for team combination)
+        core_seed = int(hashlib.md5(f"{team1}-{team2}".encode()).hexdigest(), 16)
+        core_rng = random.Random(core_seed)
+        
+        all_players_copy = all_players.copy()
+        core_rng.shuffle(all_players_copy)
+        core_players = all_players_copy[:6]
+        
+        # Variable players based on user preferences
+        remaining_pool = [p for p in all_players if p not in core_players]
+        
+        variable_seed = get_seed_from_inputs(team1, team2, form_data)
+        variable_rng = random.Random(variable_seed)
+        
+        variable_rng.shuffle(remaining_pool)
+        variable_players = remaining_pool[:5]
+        
+        # Final team
+        final_11 = core_players + variable_players
+        
+        final_seed = variable_seed ^ core_seed
+        final_rng = random.Random(final_seed)
+        final_rng.shuffle(final_11)
+        
+        return final_11
+    except Exception as e:
+        logger.error(f"Error generating fantasy 11: {str(e)}")
+        return []
+
+# Error handlers
+@app.errorhandler(404)
+def not_found_error(error):
+    return render_template('404.html'), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    db.session.rollback()
+    logger.error(f"Internal error: {str(error)}")
+    return render_template('500.html'), 500
 
 # Authentication Routes
 @app.route('/register', methods=['GET', 'POST'])
@@ -135,7 +217,6 @@ def register():
         password = request.form.get('password', '')
         confirm_password = request.form.get('confirm_password', '')
         
-        # Validation
         errors = []
         
         if not username or len(username) < 3:
@@ -151,7 +232,6 @@ def register():
         if not is_valid:
             errors.append(password_msg)
         
-        # Check if user already exists
         if User.query.filter_by(username=username).first():
             errors.append('Username already exists')
         
@@ -163,7 +243,6 @@ def register():
                 flash(error, 'danger')
             return render_template('register.html')
         
-        # Create new user
         user = User(username=username, email=email)
         user.set_password(password)
         
@@ -171,9 +250,11 @@ def register():
             db.session.add(user)
             db.session.commit()
             flash('Registration successful! Please log in.', 'success')
+            logger.info(f"New user registered: {username}")
             return redirect(url_for('login'))
         except Exception as e:
             db.session.rollback()
+            logger.error(f"Registration error: {str(e)}")
             flash('An error occurred during registration. Please try again.', 'danger')
             return render_template('register.html')
     
@@ -189,7 +270,6 @@ def login():
         password = request.form.get('password', '')
         remember = request.form.get('remember', False)
         
-        # Find user by username or email
         user = User.query.filter(
             (User.username == username_or_email) | 
             (User.email == username_or_email.lower())
@@ -201,10 +281,7 @@ def login():
                 return render_template('login.html')
             
             login_user(user, remember=remember)
-            
-            # Update last login (optional)
-            user.predictions_count = user.predictions_count or 0
-            db.session.commit()
+            logger.info(f"User logged in: {user.username}")
             
             next_page = request.args.get('next')
             if next_page:
@@ -220,14 +297,15 @@ def login():
 @app.route('/logout')
 @login_required
 def logout():
+    username = current_user.username
     logout_user()
+    logger.info(f"User logged out: {username}")
     flash('You have been logged out successfully.', 'info')
     return redirect(url_for('login'))
 
 @app.route('/profile')
 @login_required
 def profile():
-    # Get user's prediction history
     predictions = PredictionHistory.query.filter_by(user_id=current_user.id)\
                                          .order_by(PredictionHistory.created_at.desc())\
                                          .limit(10).all()
@@ -240,7 +318,6 @@ def update_profile():
     favorite_team = request.form.get('favorite_team', '').strip()
     
     if email and validate_email(email):
-        # Check if email is already taken by another user
         existing_user = User.query.filter_by(email=email).first()
         if existing_user and existing_user.id != current_user.id:
             flash('Email already in use by another account.', 'danger')
@@ -253,8 +330,10 @@ def update_profile():
     try:
         db.session.commit()
         flash('Profile updated successfully!', 'success')
+        logger.info(f"Profile updated for user: {current_user.username}")
     except Exception as e:
         db.session.rollback()
+        logger.error(f"Profile update error: {str(e)}")
         flash('An error occurred while updating profile.', 'danger')
     
     return redirect(url_for('profile'))
@@ -284,13 +363,15 @@ def change_password():
     try:
         db.session.commit()
         flash('Password changed successfully!', 'success')
+        logger.info(f"Password changed for user: {current_user.username}")
     except Exception as e:
         db.session.rollback()
+        logger.error(f"Password change error: {str(e)}")
         flash('An error occurred while changing password.', 'danger')
     
     return redirect(url_for('profile'))
 
-# Original Routes (modified to require login)
+# Main Routes
 @app.route('/')
 def home():
     if not current_user.is_authenticated:
@@ -304,16 +385,20 @@ def get_popular_picks():
     team2 = request.args.get('team2')
 
     if not team1 or not team2:
-        return jsonify({"error": "Please select both teams first"})
+        return jsonify({"error": "Please select both teams first"}), 400
 
-    players_list = get_players_from_url(team1, team2)
-    
-    seed = int(hashlib.md5(f"{team1}-{team2}".encode()).hexdigest(), 16)
-    rng = random.Random(seed)
-    shuffled_players = players_list.copy()
-    rng.shuffle(shuffled_players)
+    try:
+        players_list = get_players_pool(team1, team2)
+        
+        seed = int(hashlib.md5(f"{team1}-{team2}".encode()).hexdigest(), 16)
+        rng = random.Random(seed)
+        shuffled_players = players_list.copy()
+        rng.shuffle(shuffled_players)
 
-    return jsonify({"popular_picks": shuffled_players[:5]})
+        return jsonify({"popular_picks": shuffled_players[:5]})
+    except Exception as e:
+        logger.error(f"Error getting popular picks: {str(e)}")
+        return jsonify({"error": "Error fetching popular picks"}), 500
 
 @app.route('/predict', methods=['POST'])
 @login_required
@@ -322,11 +407,17 @@ def predict():
         team1 = request.form.get('team1')
         team2 = request.form.get('team2')
 
+        if not team1 or not team2:
+            return jsonify({'error': 'Please select both teams'}), 400
+
         if team1 == team2:
-            return jsonify({'error': 'Please select different teams'})
+            return jsonify({'error': 'Please select different teams'}), 400
         
         form_data = request.form.to_dict()
         fantasy_11 = generate_fantasy_11(team1, team2, form_data)
+        
+        if not fantasy_11:
+            return jsonify({'error': 'Unable to generate team. Please try again.'}), 500
         
         # Save prediction to history
         prediction_history = PredictionHistory(
@@ -336,19 +427,32 @@ def predict():
             predicted_team=str(fantasy_11)
         )
         
-        # Update user's prediction count
         current_user.predictions_count = (current_user.predictions_count or 0) + 1
         
         db.session.add(prediction_history)
         db.session.commit()
         
-        return jsonify({
-            'Fantasy 11': fantasy_11
-        })
+        logger.info(f"Prediction generated for user {current_user.username}: {team1} vs {team2}")
+        
+        return jsonify({'Fantasy 11': fantasy_11})
     except Exception as e:
-        print(f"Error in predict route: {str(e)}")
+        logger.error(f"Error in predict route: {str(e)}")
         db.session.rollback()
-        return jsonify({'error': f'An error occurred: {str(e)}'})
+        return jsonify({'error': f'An error occurred: {str(e)}'}), 500
+
+@app.route('/health')
+def health():
+    """Health check endpoint for monitoring"""
+    return jsonify({'status': 'healthy', 'timestamp': datetime.utcnow().isoformat()})
+
+# Create tables if they don't exist (for initial deployment)
+with app.app_context():
+    try:
+        db.create_all()
+        logger.info("Database tables created successfully")
+    except Exception as e:
+        logger.error(f"Error creating database tables: {str(e)}")
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Never run with debug=True in production
+    app.run(debug=False, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))

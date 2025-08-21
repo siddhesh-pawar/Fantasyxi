@@ -7,14 +7,14 @@
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-
       gtag('config', 'G-EB81GWMBDV');
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Fantasy 11 Predictor</title>
-    <link rel="stylesheet" href="./static/style1.css">
-    <link rel="icon" href="./static/images/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style1.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">
 </head>
 <body>
     <div class="video-background">
@@ -28,7 +28,7 @@
     <nav class="navbar">
     <div class="nav-container">
         <div class="logo">
-            <img src="/static/images/ipl3.png" alt="Fantasy11 Logo" class="logo-img">
+            <img src="{{ url_for('static', filename='images/ipl3.png') }}" alt="Fantasy11 Logo" class="logo-img">
             <span>Fantasy11</span>
         </div>
         <div class="nav-links">
@@ -44,7 +44,7 @@
     <p style="text-align: center; color: #f32525; margin-top: 120px;">
         Welcome, {{ current_user.username }}!
     </p>
-{% endif %}
+    {% endif %}
 
     <section class="hero">
         <div class="hero-content">
@@ -61,12 +61,12 @@
         <h2 class="section-title">Why Choose Fantasy 11 Predictor?</h2>
         <div class="features-grid">
             <div class="feature-card">
-                <div class="feature-icon">✺</div>
+                <div class="feature-icon">⚡</div>
                 <h3>AI-Powered Predictions</h3>
                 <p>Our advanced algorithm analyzes player performance, match conditions, and historical data to recommend the best team composition.</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">⚡</div>
+                <div class="feature-icon">🎯</div>
                 <h3>Customizable Strategy</h3>
                 <p>Adjust your risk profile and selection preferences to match your playing style. Choose between consistency and high-risk, high-reward picks.</p>
             </div>
@@ -113,8 +113,9 @@
     <h2>IPL Fantasy11</h2>
     <h2>AI-Powered Fantasy 11 Predictor</h2>
     
-    <!-- MAIN FORM STARTS HERE - ONLY ONE FORM TAG -->
+    <!-- MAIN FORM STARTS HERE -->
     <form id="fantasyForm">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         
         <!-- Visual Team Selector Section -->
         <div class="team-selector-section" id="team-selector">
@@ -331,6 +332,6 @@
         </div>
     </footer>
 
-    <script src="./static/script.js"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
